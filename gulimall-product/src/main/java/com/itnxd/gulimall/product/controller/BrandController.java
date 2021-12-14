@@ -1,9 +1,15 @@
 package com.itnxd.gulimall.product.controller;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 
+import com.itnxd.common.valid.AddGroup;
+import com.itnxd.common.valid.UpdateGroup;
+import com.itnxd.common.valid.UpdateStatusGroup;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,6 +21,7 @@ import com.itnxd.gulimall.product.service.BrandService;
 import com.itnxd.common.utils.PageUtils;
 import com.itnxd.common.utils.R;
 
+import javax.validation.Valid;
 
 
 /**
@@ -55,12 +62,23 @@ public class BrandController {
 
     /**
      * 保存
+     * @Valid: 开启JSR303校验
+     * BindingResult: 紧跟要校验数据返回校验结果信息
+     *      若不写则异常会向上抛出
      */
     @RequestMapping("/save")
     //@RequiresPermissions("product:brand:save")
-    public R save(@RequestBody BrandEntity brand){
+    public R save(@Validated(AddGroup.class) @RequestBody BrandEntity brand /*, BindingResult result*/){
+        /*if(result.hasErrors()){
+            Map<String, String> map = new HashMap<>();
+            result.getFieldErrors().forEach((item)->{
+                String message = item.getDefaultMessage();
+                String field = item.getField();
+                map.put(field, message);
+            });
+            return R.error(400, "提交的数据不合法！").put("data", map);
+        }*/
 		brandService.save(brand);
-
         return R.ok();
     }
 
@@ -68,10 +86,15 @@ public class BrandController {
      * 修改
      */
     @RequestMapping("/update")
-    //@RequiresPermissions("product:brand:update")
-    public R update(@RequestBody BrandEntity brand){
+    public R update(@Validated(UpdateGroup.class) @RequestBody BrandEntity brand){
 		brandService.updateById(brand);
 
+        return R.ok();
+    }
+
+    @RequestMapping("/update/status")
+    public R updateStatus(@Validated(UpdateStatusGroup.class) @RequestBody BrandEntity brand){
+        brandService.updateById(brand);
         return R.ok();
     }
 
